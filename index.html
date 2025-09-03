@@ -3,655 +3,1014 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Создай концепт игры за 40 минут — Мастер‑класс</title>
-    <meta name="description" content="Пошаговый мастер‑класс: как с помощью нейросетей быстро собрать питч‑документ игры (сюжет, герой, сеттинг и концепт‑арты).">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>Нейросети: новый соавтор геймдизайнера</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg: #0b0f18;
-            --card: #12192a;
-            --accent: #7c5cff;
-            --accent-2: #22d3ee;
-            --text: #e8ecf1;
-            --muted: #96a0b5;
-            --success: #22c55e;
-            --warn: #f59e0b;
-            --danger: #ef4444;
-            --shadow: 0 10px 30px rgba(0,0,0,0.45);
+            --primary: #6C63FF;
+            --secondary: #4A40E5;
+            --accent: #FF6584;
+            --light: #F7F9FC;
+            --dark: #2D2B55;
+            --text: #33334F;
+            --transition: all 0.3s ease;
         }
-
-        html, body { height: 100%; }
-        body {
+        
+        * {
             margin: 0;
-            background: radial-gradient(1200px 800px at 80% -10%, rgba(124,92,255,.12), transparent 60%),
-                        radial-gradient(900px 600px at 10% 110%, rgba(34,211,238,.10), transparent 60%),
-                        var(--bg);
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
             color: var(--text);
-            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            line-height: 1.6;
             overflow-x: hidden;
         }
-
-        .container {
-            max-width: 1080px;
+        
+        section {
+            padding: 80px 20px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 20px 24px 120px;
         }
-
-        header {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            background: linear-gradient(180deg, rgba(11,15,24,0.85), rgba(11,15,24,0.65) 65%, rgba(11,15,24,0));
-            backdrop-filter: saturate(1.2) blur(6px);
+        
+        h1, h2, h3 {
+            color: var(--dark);
+            margin-bottom: 1rem;
         }
-
-        .topbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 14px 24px;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 800;
-            letter-spacing: .2px;
-        }
-
-        .brand .logo {
-            width: 38px; height: 38px;
-            border-radius: 10px;
-            background: conic-gradient(from 210deg, var(--accent), var(--accent-2));
-            box-shadow: 0 0 0 2px rgba(124,92,255,.25), 0 0 30px rgba(124,92,255,.25) inset;
-        }
-
-        .actions { display: flex; gap: 10px; align-items: center; }
-        .btn {
-            appearance: none;
-            border: 1px solid rgba(255,255,255,.08);
-            color: var(--text);
-            background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-            padding: 10px 14px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: .2s ease all;
-        }
-        .btn:hover { transform: translateY(-1px); border-color: rgba(255,255,255,.18); }
-        .btn.primary { background: linear-gradient(180deg, var(--accent), #6949ff); border-color: transparent; }
-        .btn.ghost { background: transparent; }
-
-        .hero {
-            display: grid;
-            grid-template-columns: 1.2fr .8fr;
-            gap: 28px;
-            align-items: center;
-            padding: 28px 24px 8px;
-        }
-        @media (max-width: 900px){ .hero { grid-template-columns: 1fr; } }
-        @media (max-width: 768px){
-            .container { padding: 16px 20px 100px; }
-            .hero { padding: 20px 20px 0; }
-            .topbar { padding: 12px 20px; }
-            .gallery { grid-template-columns: 1fr; gap: 16px; }
-            .gallery .imgcard { aspect-ratio: 16/9; }
-            .twocol { grid-template-columns: 1fr; gap: 20px; }
-            .card { padding: 16px; }
-            .prompt { padding: 16px; font-size: 14px; }
-            .prompt .copy { top: 12px; right: 12px; }
-            .registration-guide .twocol { grid-template-columns: 1fr; }
-            .registration-image { max-height: 250px; }
-            .demo-gallery { grid-template-columns: 1fr; }
-        }
-        @media (max-width: 480px){
-            .container { padding: 12px 16px 80px; }
-            .hero { padding: 16px 16px 0; }
-            .topbar { padding: 10px 16px; }
-            .card { padding: 14px; }
-            .prompt { padding: 14px; font-size: 13px; }
-            .prompt .copy { top: 10px; right: 10px; padding: 8px 10px; font-size: 11px; }
-            .registration-image { max-height: 200px; }
-        }
-
+        
         h1 {
-            font-size: clamp(26px, 3.6vw, 46px);
-            line-height: 1.08;
-            margin: 12px 0 10px;
+            font-size: 2.8rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
         }
-        .lead { color: var(--muted); font-size: clamp(14px, 1.7vw, 18px); }
-
-        .cover {
-            height: 320px;
-            border-radius: 16px;
-            background:
-              radial-gradient(120px 80px at 20% 20%, rgba(124,92,255,.22), transparent 60%),
-              radial-gradient(160px 100px at 80% 60%, rgba(34,211,238,.18), transparent 60%),
-              linear-gradient(145deg, #151d33, #0f1526);
-            box-shadow: var(--shadow);
-            display: grid; place-items: center;
-            overflow: hidden; position: relative;
-        }
-        .orb {
-            position: absolute; inset: -40% -20% auto auto; width: 80%; height: 160%;
-            background: radial-gradient(circle at 30% 40%, rgba(124,92,255,.25), transparent 45%),
-                        radial-gradient(circle at 60% 70%, rgba(34,211,238,.25), transparent 40%);
-            filter: blur(40px); transform: rotate(6deg);
-        }
-        .cover h2 { z-index: 1; font-size: clamp(18px, 2.4vw, 26px); font-weight: 800; letter-spacing: .2px; text-align:center; padding: 0 10px; word-break: break-word; }
-
-        .progress {
-            position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
-            width: min(720px, 86vw); height: 8px; background: rgba(255,255,255,.07);
-            border-radius: 99px; overflow: hidden; box-shadow: var(--shadow);
-        }
-        .progress .bar { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width .35s ease; }
-
-        .grid {
-            display: grid; gap: 16px; margin-top: 20px;
-            grid-template-columns: repeat(12, 1fr);
-        }
-        .card {
-            grid-column: span 12;
-            padding: 18px;
-            border-radius: 14px;
-            background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-            border: 1px solid rgba(255,255,255,.08);
-            box-shadow: var(--shadow);
-            position: relative;
-            overflow: hidden;
-            animation: floatIn .5s ease both;
-        }
-        .card::after{ content:""; position:absolute; inset:0; background: radial-gradient(600px 200px at var(--mx,50%) -10%, rgba(124,92,255,.18), transparent 40%); opacity:0; transition:.25s ease opacity; pointer-events:none; }
-        .card:hover{ border-color: rgba(124,92,255,.35); transform: translateY(-2px); }
-        .card:hover::after{ opacity:1; }
-        @keyframes floatIn { from{ opacity:0; transform: translateY(10px)} to{ opacity:1; transform:none } }
-
-        .card h3 { margin: 8px 0 8px; font-size: 20px; }
-        .eyebrow { color: var(--accent-2); text-transform: uppercase; font-size: 12px; letter-spacing: .12em; font-weight: 700; }
-        .muted { color: var(--muted); }
-
-        .twocol { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
-        @media (max-width: 900px){ .twocol { grid-template-columns: 1fr; } }
-
-        .prompt {
-            background: #0e1426;
-            border: 1px dashed rgba(255,255,255,.18);
-            border-radius: 12px; padding: 12px;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            font-size: 13px; line-height: 1.5; color: #dbe7ff;
+        
+        h2 {
+            font-size: 2.2rem;
+            margin-bottom: 2rem;
             position: relative;
         }
-        .prompt:has(.copy) {
-            padding-right: 80px;
+        
+        h2:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 2px;
         }
-        .prompt:not(:has(.copy)) {
-            background: #0a0f1a;
-            border: 1px solid rgba(255,255,255,.08);
-            border-radius: 10px; padding: 14px;
-            font-family: inherit;
-            font-size: 14px; line-height: 1.6; color: var(--muted);
+        
+        h3 {
+            font-size: 1.5rem;
+            margin: 1.5rem 0 1rem;
         }
-        .prompt:has(.copy):hover{ box-shadow: 0 0 0 1px rgba(124,92,255,.35) inset, 0 8px 20px rgba(124,92,255,.15); }
-        .prompt .copy {
-            position: absolute; top: 8px; right: 8px;
-            font-size: 12px; padding: 6px 8px;
-            background: rgba(124,92,255,.15);
-            border: 1px solid rgba(124,92,255,.35);
-            border-radius: 8px; cursor: pointer;
+        
+        p {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
         }
-
-        .steps { counter-reset: step; }
-        .step::before {
-            counter-increment: step;
-            content: "Шаг " counter(step);
-            position: absolute; top: 12px; right: 14px; font-size: 11px; opacity: .7; color: var(--muted);
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
-
-        .kbd { display: inline-block; border: 1px solid rgba(255,255,255,.18); padding: 2px 6px; border-radius: 6px; background: rgba(255,255,255,.06); font-size: 12px; }
-
-        .timeline { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
-        .badge { font-size: 12px; padding: 6px 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); }
-
-        .nav {
-            position: fixed; right: 18px; bottom: 70px; display: grid; gap: 10px; z-index: 40;
-        }
-        .nav .fab { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-size: 18px; }
-
-        .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .gallery .imgcard { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 16px; border: 2px solid rgba(255,255,255,.12); background: #0c1226; transition: .25s ease transform, .25s ease box-shadow, .25s ease border-color; box-shadow: 0 8px 25px rgba(0,0,0,0.6); }
-        .gallery .imgcard:hover{ transform: translateY(-2px) scale(1.01); border-color: rgba(124,92,255,.4); box-shadow: 0 10px 30px rgba(124,92,255,.2); }
-        .practice2 .gallery { 
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 16px; 
-            margin-top: 24px; 
-        }
-        .practice2 .gallery .imgcard { 
-            aspect-ratio: 3/2; 
-            border-radius: 20px; 
-            border: 3px solid rgba(255,255,255,.15);
-            box-shadow: 0 12px 35px rgba(0,0,0,0.8);
-        }
-        .practice2 .twocol > div:first-child .gallery {
-            grid-template-columns: 1fr;
-            gap: 20px;
-        }
-        .practice2 .twocol > div:first-child .gallery .imgcard {
-            aspect-ratio: 16/9;
-            border-radius: 24px;
-            border: 4px solid rgba(255,255,255,.18);
-            box-shadow: 0 16px 40px rgba(0,0,0,0.9);
-        }
-        .practice2 .twocol > div:first-child .gallery .imgcard:hover {
-            transform: translateY(-6px) scale(1.03);
-            border-color: rgba(124,92,255,.6);
-            box-shadow: 0 20px 50px rgba(124,92,255,.3);
-        }
-        .practice2 .gallery .imgcard:hover{ 
-            transform: translateY(-4px) scale(1.02); 
-            border-color: rgba(124,92,255,.5); 
-            box-shadow: 0 15px 40px rgba(124,92,255,.25); 
-        }
-
-        footer { margin: 50px 0; text-align: center; color: var(--muted); font-size: 13px; }
-
-        /* Новые стили для блока регистрации */
-        .registration-guide {
-            margin: 30px 0;
-        }
-        .registration-image {
-            width: 100%;
-            border-radius: 12px;
-            border: 2px solid rgba(255,255,255,.1);
-            box-shadow: var(--shadow);
-            margin: 10px 0;
-        }
-        .registration-step {
-            margin-bottom: 20px;
-        }
-        .registration-step h4 {
-            color: var(--accent-2);
-            margin-bottom: 8px;
-            font-size: 18px;
-        }
-        .giga-button {
-            display: block;
-            width: 100%;
-            max-width: 300px;
-            margin: 25px auto 10px;
-            padding: 14px 28px;
-            background: linear-gradient(90deg, var(--accent), #6949ff);
-            color: white;
+        
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             text-align: center;
-            border-radius: 12px;
-            font-weight: 600;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, rgba(108, 99, 255, 0.05) 0%, rgba(74, 64, 229, 0.1) 100%);
+        }
+        
+        .subtitle {
+            font-size: 1.4rem;
+            color: var(--text);
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 50px;
             text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
             border: none;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(124, 92, 255, 0.4);
+            box-shadow: 0 4px 20px rgba(108, 99, 255, 0.3);
         }
-        .giga-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(124, 92, 255, 0.6);
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(108, 99, 255, 0.4);
         }
-        .image-caption {
+        
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            box-shadow: none;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            transition: var(--transition);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .icon-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, rgba(108, 99, 255, 0.1) 0%, rgba(74, 64, 229, 0.15) 100%);
+            border-radius: 50%;
+            margin-bottom: 20px;
+        }
+        
+        .icon-box i {
+            font-size: 28px;
+            color: var(--primary);
+        }
+        
+        .prompt-box {
+            background: #f8f9ff;
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .prompt-text {
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        
+        .copy-btn:hover {
+            background: var(--secondary);
+        }
+        
+        .step-box {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 30px;
+        }
+        
+        .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-right: 15px;
+            margin-top: 5px;
+        }
+        
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+        
+        .gallery-item {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+        
+        .gallery-item:hover {
+            transform: scale(1.03);
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .gallery-caption {
+            padding: 15px;
+            background: white;
             text-align: center;
-            font-size: 14px;
-            color: var(--muted);
-            margin-top: 8px;
+            font-weight: 600;
+        }
+        
+        .instruction-steps {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+        }
+        
+        .instruction-step {
+            flex: 1;
+            min-width: 250px;
+            text-align: center;
+        }
+        
+        .instruction-step img {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             margin-bottom: 15px;
         }
-
-        /* Стили для демо-галереи */
-        .demo-gallery {
+        
+        .checklist {
+            list-style-type: none;
+            margin: 20px 0;
+        }
+        
+        .checklist li {
+            margin-bottom: 12px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .checklist li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 22px;
+            height: 22px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        .triangle-visual {
+            display: flex;
+            justify-content: center;
+            margin: 40px 0;
+        }
+        
+        .triangle {
+            position: relative;
+            width: 300px;
+            height: 260px;
+        }
+        
+        .triangle-item {
+            position: absolute;
+            text-align: center;
+            width: 120px;
+        }
+        
+        .triangle-item:nth-child(1) {
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .triangle-item:nth-child(2) {
+            bottom: 0;
+            left: 0;
+        }
+        
+        .triangle-item:nth-child(3) {
+            bottom: 0;
+            right: 0;
+        }
+        
+        .triangle-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .triangle-line {
+            position: absolute;
+            background: var(--primary);
+            height: 2px;
+            transform-origin: 0 0;
+        }
+        
+        .triangle-line-1 {
+            width: 150px;
+            top: 70px;
+            left: 150px;
+            transform: rotate(-60deg);
+        }
+        
+        .triangle-line-2 {
+            width: 150px;
+            top: 70px;
+            left: 150px;
+            transform: rotate(-120deg);
+        }
+        
+        .triangle-line-3 {
+            width: 150px;
+            top: 190px;
+            left: 75px;
+        }
+        
+        .results-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
-            margin-top: 25px;
+            margin: 40px 0;
         }
-        .demo-gallery .imgcard {
-            width: 100%;
-            aspect-ratio: 3/4;
-            object-fit: cover;
-            border-radius: 18px;
-            border: 3px solid rgba(255,255,255,.15);
-            box-shadow: 0 12px 35px rgba(0,0,0,0.8);
-            transition: all 0.3s ease;
+        
+        .result-item {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: flex-start;
         }
-        .demo-gallery .imgcard:hover {
-            transform: translateY(-5px) scale(1.02);
-            border-color: rgba(124,92,255,.5);
-            box-shadow: 0 18px 45px rgba(124,92,255,.25);
+        
+        .result-icon {
+            margin-right: 15px;
+            color: var(--primary);
+            font-size: 24px;
+            min-width: 40px;
         }
-        @media (max-width: 900px) {
-            .demo-gallery {
-                grid-template-columns: repeat(2, 1fr);
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            h2 {
+                font-size: 1.8rem;
+            }
+            
+            section {
+                padding: 60px 20px;
+            }
+            
+            .triangle {
+                width: 250px;
+                height: 220px;
+            }
+            
+            .triangle-item {
+                width: 100px;
+            }
+            
+            .triangle-line-1, .triangle-line-2, .triangle-line-3 {
+                width: 120px;
+            }
+            
+            .triangle-line-1 {
+                top: 60px;
+                left: 125px;
+            }
+            
+            .triangle-line-2 {
+                top: 60px;
+                left: 125px;
+            }
+            
+            .triangle-line-3 {
+                top: 160px;
+                left: 65px;
             }
         }
-        @media (max-width: 600px) {
-            .demo-gallery {
-                grid-template-columns: 1fr;
+        
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate {
+            animation: fadeIn 0.8s ease forwards;
+        }
+        
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+        
+        /* Навигация */
+        .nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            padding: 15px 0;
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-left: 30px;
+        }
+        
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--dark);
+            cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .nav-links {
+                position: fixed;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background: white;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+                transform: translateY(-100%);
+                opacity: 0;
+                transition: var(--transition);
+                pointer-events: none;
+            }
+            
+            .nav-links.active {
+                transform: translateY(0);
+                opacity: 1;
+                pointer-events: all;
+            }
+            
+            .nav-links li {
+                margin: 15px 0;
             }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="topbar container">
-            <div class="brand" id="brandMouse">
-                <div class="logo" aria-hidden="true"></div>
-                <div>
-                    <div style="font-size:13px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.18em;">Мастер‑класс</div>
-                    Создай концепт игры за 40 минут
-                </div>
-            </div>
-            <div class="actions">
-                <button class="btn ghost" onclick="window.print()">Печать/ PDF</button>
-                <button class="btn primary" id="jumpToSteps">К шагам</button>
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="#" class="logo">GameAI Workshop</a>
+            <button class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul class="nav-links">
+                <li><a href="#about">О мастере</a></li>
+                <li><a href="#plan">План</a></li>
+                <li><a href="#gigachat">GigaChat</a></li>
+                <li><a href="#results">Результаты</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <h1 class="animate">Нейросети: новый соавтор геймдизайнера</h1>
+            <p class="subtitle animate delay-1">Создаём питч-документ с историей, героем и сеттингом всего за 40 минут</p>
+            <a href="#plan" class="btn animate delay-2">Узнать программу</a>
+        </div>
+    </section>
+
+    <section id="about">
+        <div class="container">
+            <h2>Ваш эксперт</h2>
+            <div class="card animate">
+                <h3>Сибатуллин Руслан</h3>
+                <p>Ваш проводник в мир геймдизайна и нейросетей с более чем 6-летним опытом создания игр и преподавания IT.</p>
+                <p>По образованию — инженер, что позволяет ценить точность и эффективность в работе.</p>
+                <p>С апреля 2023 года активно исследую и внедряю нейросети в игровую разработку, используя их на всех этапах — от генерации идеи до реализации.</p>
             </div>
         </div>
-    </header>
+    </section>
 
-    <div class="container">
-        <section class="hero">
-            <div>
-                <h1>Как нейросети помогают геймдизайнерам</h1>
-                <p class="lead">Соберём питч‑документ: сюжет, герой, сеттинг и концепт‑арты — за 40 минут. Вы получите готовые подсказки и пример выполненной работы.</p>
-                <div class="timeline">
-                    <span class="badge">Общее время: 40 минут</span>
-                    <span class="badge">Инструменты: GigaChat</span>
-                </div>
-            </div>
-            <div class="cover" aria-hidden="true">
-                <div class="orb"></div>
-                <h2>Питч‑документ = идея + текст + образы</h2>
-            </div>
-        </section>
-
-        <!-- НОВЫЙ БЛОК: ИНСТРУКЦИЯ ПО РЕГИСТРАЦИИ -->
-        <section class="registration-guide">
-            <div class="card">
-                <div class="eyebrow">Подготовка</div>
-                <h3>Начните с регистрации в GigaChat</h3>
-                <p class="muted">Перед началом работы необходимо создать аккаунт в нейросети GigaChat. Это займет всего 2 минуты.</p>
-                
-                <div class="registration-step">
-                    <p><strong>После открытия сайта GigaChat найдите в правом нижнем углу кнопку "Попробовать"</strong></p>
-                    <img src="./Assets/First.png" alt="Интерфейс GigaChat - кнопка Попробовать" class="registration-image">
-                </div>
-
-                <div class="twocol">
-                    <div>
-                        <h4>1. Введите номер телефона</h4>
-                        <p>Откроется поле для ввода номера телефона. Введите свой номер и нажмите кнопку "Продолжить".</p>
-                        <img src="./Assets/number.png" alt="Форма ввода номера телефона в GigaChat" class="registration-image">
-                        <div class="image-caption">Ввод номера телефона для регистрации</div>
-                    </div>
-                    <div>
-                        <h4>2. Подтвердите кодом из SMS</h4>
-                        <p>Введите полученный по СМС код подтверждения для завершения регистрации.</p>
-                        <img src="./Assets/sms.png" alt="Форма ввода СМС кода подтверждения" class="registration-image">
-                        <div class="image-caption">Подтверждение номера через СМС</div>
-                    </div>
-                </div>
-
-                <a href="https://giga.chat/" target="_blank" class="giga-button">Перейти в GigaChat</a>
-                <p class="muted" style="text-align: center; margin-top: 10px;">Ссылка откроется в новом окне</p>
-            </div>
-        </section>
-
-        <section id="steps" class="steps">
+    <section id="plan">
+        <div class="container">
+            <h2>План мастер-класса</h2>
             <div class="grid">
-                <!-- ШАГ 1 -->
-                <article class="card step" id="step1">
-                    <div class="eyebrow">Введение — 5 минут</div>
-                    <h3>Зачем нужен питч‑документ</h3>
-                    <p class="muted">Это упаковка вашей будущей игры: кратко объясняет, о чём игра, кто герой, где действие и почему это круто. Раньше — недели, с AI — десятки минут.</p>
-                    <div class="twocol">
-                        <div>
-                            <ul>
-                                <li><b>Что делаем:</b> знакомимся с целями занятия.</li>
-                                <li><b>Результат:</b> понимаем структуру будущего питча.</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <div class="prompt">
-                                <div><b>Ключевая мысль для слайда:</b></div>
-                                Идея → Питч‑документ → Визуализация. Нейросети ускоряют рождение концепта и дают быстрые варианты для обсуждения.
-                            </div>
-                        </div>
+                <div class="card animate">
+                    <div class="icon-box">
+                        <i class="fas fa-brain"></i>
                     </div>
-                </article>
-
-                <!-- ШАГ 2 -->
-                <article class="card step" id="step2">
-                    <div class="eyebrow">Практика №1 — 15 минут</div>
-                    <h3>Создаём историю и героя с текстовой нейросетью</h3>
-                    <p class="muted">Откройте GigaChat. Скопируйте запрос ниже — модель задаст 10 уточняющих вопросов и соберёт концепцию.</p>
-                    <div class="prompt">
-                                <button class="copy" data-copy>Копировать</button>
-                                Сгенерируй сюжет, главного героя и сеттинг для игры, задав 10 уточняющих вопросов.
-                            </div>
-                    <div class="twocol">
-                        <div>
-                            <ul>
-                                <li><b>Отвечайте подробно:</b> жанр, тональность, конфликт, цель героя.</li>
-                                <li><b>Проверяйте себя:</b> что делает игру уникальной? Для кого она?</li>
-                                <li><b>Не понравилось?</b> попросите переписать часть: «Переделай X, сделай Y».</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <div class="prompt">
-                                <div><b>Подсказка‑улучшайзер:</b></div>
-                                Представь, что ты креативный директор. Добавь оригинальный конфликт, нестандартную механику и эмоциональный твист в финале.
-                            </div>
-                        </div>
+                    <h3>Нейросети в геймдизайне</h3>
+                    <p>Изучим основы работы нейросетей и их применение в создании игр</p>
+                </div>
+                <div class="card animate delay-1">
+                    <div class="icon-box">
+                        <i class="fas fa-question-circle"></i>
                     </div>
-                </article>
-
-                <!-- ШАГ 3 -->
-                <article class="card step practice2" id="step3">
-                    <div class="eyebrow">Практика №2 — 15 минут</div>
-                    <h3>Визуализируем: 3 ключевых концепт‑арта</h3>
-                    <p class="muted">В этом же чате GigaChat, где вы получили текстовую концепцию, попросите визуализировать героя, мир и стартовую локацию по уже сгенерированному описанию. Не открывайте новый диалог — так модель учтёт контекст.</p>
-                    <div class="twocol">
-                        <div>
-                            <div class="prompt">
-                                <button class="copy" data-copy>Копировать</button>
-                                Нарисуй как будет выглядеть главный герой по твоему описанию
-                            </div>
-                            <div class="prompt" style="margin-top:10px;">
-                                <button class="copy" data-copy>Копировать</button>
-                                Нарисуй как будет выглядеть место действия по твоему описанию
-                            </div>
-                            <div class="prompt" style="margin-top:10px;">
-                                <button class="copy" data-copy>Копировать</button>
-                                Нарисуй как будет выглядеть стартовая локация по твоему описанию
-                            </div>
-                        </div>
-                        <div>
-                            <ul>
-                                <li><b>Правило детализации:</b> кто/что в кадре, стиль, свет, эмоция.</li>
-                                <li><b>Экспериментируйте:</b> «в стиле аниме», «мрачный стимпанк», «пиксель‑арт».</li>
-                                <li><b>Итерации:</b> правьте подсказку, пока не понравится результат.</li>
-                                <li><b>Подсказка:</b> сделай 2–3 варианта для каждого промта: поменяй ракурс, освещение и художественный стиль (реалистичный / иллюстративный / изометрия), сохранив сюжетные детали.</li>
-                            </ul>
-                            <div class="gallery" style="margin-top:8px;">
-                                <img src="./Assets/user-hero.jpeg" alt="Портрет героя (пример пользователя)" class="imgcard" onerror="this.onerror=null; this.src='./Assets/user-hero.jpg'; if(!this.src) this.src='https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&w=1200&q=80'"/>
-                                <img src="./Assets/user-station.jpeg" alt="Космическая станция (пример пользователя)" class="imgcard" onerror="this.onerror=null; this.src='./Assets/user-station.jpg'; if(!this.src) this.src='https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1200&q=80'"/>
-                                <img src="./Assets/user-lab.jpeg" alt="Лаборатория/вид из иллюминатора (пример пользователя)" class="imgcard" onerror="this.onerror=null; this.src='./Assets/user-lab.jpg'; if(!this.src) this.src='https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&q=80'"/>
-                            </div>
-                        </div>
+                    <h3>Генерация вопросов</h3>
+                    <p>Научимся создавать эффективные промты для получения нужных результатов</p>
+                </div>
+                <div class="card animate delay-2">
+                    <div class="icon-box">
+                        <i class="fas fa-paint-brush"></i>
                     </div>
-                </article>
-
-                <!-- ШАГ 4 -->
-                <article class="card step" id="step4">
-                    <div class="eyebrow">Итог — 5 минут</div>
-                    <h3>Ваш питч‑документ готов</h3>
-                    <p class="muted">Посмотрим демонстрационный пример ниже, обсудим, что получилось и почему. Зафиксируйте выводы: GigaChat — ускоритель творчества и способ быстро проверить идею.</p>
-                    <div class="twocol">
-                        <div>
-                            <ul>
-                                <li><b>Вы сделали:</b> придумали концепцию, уточнили детали, визуализировали.</li>
-                                <li><b>Что дальше:</b> превратить питч в прототип — бумажный или цифровой.</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <div class="prompt">
-                                Что сделало вашу игру уникальной? Какой элемент стоило бы развить в первую очередь — сюжетный поворот, механику, визуальный стиль?
-                            </div>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- ДЕМО ПРИМЕР ПИТЧА -->
-                <article class="card" id="demo">
-                    <div class="eyebrow">Демонстрационный пример</div>
-                    <h3>Питч‑документ: «Ключ Эфира»</h3>
-                    <div class="twocol">
-                        <div>
-                            <h4>Сюжет</h4>
-                            <p class="muted">Действие разворачивается в будущем, в XXIII веке, когда человечество освоило дальние уголки космоса. Главный герой — детектив Александр Кортес, специалист по расследованию преступлений на стыке науки и магии. Его новое дело — исчезновение учёных из центра, изучающего древние артефакты невероятной силы. Выясняется, что они участвовали в секретном проекте по созданию устройства для контроля пространства‑времени. Ключевые компоненты похищены неизвестным — судьба человечества зависит от успешной миссии Кортеса.</p>
-                            <h4>Главный герой</h4>
-                            <p class="muted">Александр Кортес — опытный детектив с острым умом и чувством юмора. Видит скрытые связи, умеет разряжать обстановку, но действует точно и решительно. Его сила — нестандартные решения там, где логика бессильна.</p>
-                            <h4>Место действия</h4>
-                            <p class="muted">Старт на космической станции на окраине Галактики — центр науки и торговли, где бок о бок живут люди, пришельцы, роботы и киборги. Далее — заброшенные планеты, древние храмы и высокотехнологичные лаборатории, каждая со своей атмосферой и механиками.</p>
-                        </div>
-                        <div>
-                            <h4>Жанр и механики</h4>
-                            <ul>
-                                <li>Детективное приключение с элементами научной фантастики и мистики</li>
-                                <li>Сканирование «эхо» событий для восстановления цепочек причин‑следствий</li>
-                                <li>Комбинация улик науки/магии для решения головоломок и выбора стратегии</li>
-                            </ul>
-                            <h4>Структура</h4>
-                            <ol>
-                                <li>Станция: сцена преступления и первые зацепки</li>
-                                <li>Заброшенная планета: след похищенных компонентов</li>
-                                <li>Храм и лаборатория: раскрытие мотива и личности антагониста</li>
-                                <li>Финал: выбор, влияющий на пространство‑время</li>
-                            </ol>
-                            <h4>Уникальность</h4>
-                            <ul>
-                                <li>Смешение научного подхода и мистических артефактов</li>
-                                <li>Расследование на уровне пространства‑времени с моральными последствиями</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Увеличенная галерея для демо-примера -->
-                    <div class="demo-gallery">
-                        <img src="./Assets/user-hero.jpeg" alt="Портрет героя — Александр Кортес" class="imgcard" onerror="this.onerror=null; this.src='./assets/detective_hero.svg'"/>
-                        <img src="./Assets/user-station.jpeg" alt="Космическая станция" class="imgcard" onerror="this.onerror=null; this.src='./assets/space_station.svg'"/>
-                        <img src="./Assets/user-lab.jpeg" alt="Исследовательская лаборатория" class="imgcard" onerror="this.onerror=null; this.src='./assets/research_lab.svg'"/>
-                    </div>
-                </article>
+                    <h3>Создание концепт-артов</h3>
+                    <p>Превратим текстовые описания в визуальные образы с помощью ИИ</p>
+                </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <footer>
-            © 2025. Учебная презентация от Фабрики Науки
-        </footer>
-    </div>
+    <section id="neurons">
+        <div class="container">
+            <h2>Как работают нейросети?</h2>
+            <div class="card animate">
+                <h3>Креативный помощник, который не ищет, а придумывает</h3>
+                
+                <div class="grid">
+                    <div>
+                        <h4>Как это работает?</h4>
+                        <ul class="checklist">
+                            <li>Обучили на данных</li>
+                            <li>Понимает запрос</li>
+                            <li>Анализирует шаблоны</li>
+                            <li>Создает новое</li>
+                            <li>Ускоряет творчество</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Преимущества для геймдизайна</h4>
+                        <ul class="checklist">
+                            <li>Мгновенная генерация идей</li>
+                            <li>Визуализация концепций</li>
+                            <li>Прототипирование за минуты</li>
+                            <li>Преодоление творческого кризиса</li>
+                            <li>Создание вариаций контента</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <div class="nav">
-        <button class="btn fab" id="prev">↑</button>
-        <button class="btn fab" id="next">↓</button>
-    </div>
-    <div class="progress" aria-hidden="true"><div class="bar" id="progressBar"></div></div>
+    <section id="practice">
+        <div class="container">
+            <h2>Переходим к практике</h2>
+            <p class="animate">Создадим концепт игры вместе с нейросетью всего за 15 минут</p>
+            
+            <div class="grid">
+                <div class="card animate">
+                    <div class="step-box">
+                        <div class="step-number">1</div>
+                        <div>
+                            <h3>Запускаем диалог</h3>
+                            <p>Открываем GigaChat и начинаем общение с ИИ</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card animate delay-1">
+                    <div class="step-box">
+                        <div class="step-number">2</div>
+                        <div>
+                            <h3>Пишем промт</h3>
+                            <p>Запрашиваем 10 вопросов от ИИ для генерации идеи</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card animate delay-2">
+                    <div class="step-box">
+                        <div class="step-number">3</div>
+                        <div>
+                            <h3>Придумываем ответы</h3>
+                            <p>Отвечаем на вопросы и фантазируем вместе с нейросетью</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card animate">
+                    <div class="step-box">
+                        <div class="step-number">4</div>
+                        <div>
+                            <h3>Получаем описания</h3>
+                            <p>Читаем сгенерированные тексты и вносим правки</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card animate delay-1">
+                    <div class="step-box">
+                        <div class="step-number">5</div>
+                        <div>
+                            <h3>Генерируем арты</h3>
+                            <p>Визуализируем мир и героев через концепт-арты</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="gigachat">
+        <div class="container">
+            <h2>Регистрируемся в GigaChat</h2>
+            <p class="animate">Наш ключ к генерации идей и картинок</p>
+            
+            <div class="instruction-steps animate">
+                <div class="instruction-step">
+                    <img src="Assets/First.png" alt="Шаг 1: Нажмите кнопку Попробовать">
+                    <p>1. Зайдите на сайт и нажмите "Попробовать"</p>
+                </div>
+                <div class="instruction-step">
+                    <img src="Assets/number.png" alt="Шаг 2: Введите номер телефона">
+                    <p>2. Введите свой номер телефона</p>
+                </div>
+                <div class="instruction-step">
+                    <img src="Assets/sms.png" alt="Шаг 3: Введите код из SMS">
+                    <p>3. Введите код из SMS-сообщения</p>
+                </div>
+            </div>
+            
+            <div class="animate" style="text-align: center; margin-top: 30px;">
+                <a href="https://giga.chat" class="btn" target="_blank">Перейти в GigaChat</a>
+            </div>
+            
+            <div class="card animate" style="margin-top: 40px;">
+                <h3>Всё готово к старту!</h3>
+                <ul class="checklist">
+                    <li>Поняли силу нейросети</li>
+                    <li>Авторизовались в GigaChat</li>
+                    <li>Открыли новый чат</li>
+                    <li>Запускаем генерацию!</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="concept">
+        <div class="container">
+            <h2>Основа любой игры</h2>
+            <p class="animate">Любая игра стоит на трёх китах: сюжете, герое и сеттинге</p>
+            
+            <div class="triangle-visual animate">
+                <div class="triangle">
+                    <div class="triangle-item">
+                        <div class="triangle-content">
+                            <h4>Сюжет</h4>
+                            <p>Конфликт и цель</p>
+                        </div>
+                    </div>
+                    <div class="triangle-item">
+                        <div class="triangle-content">
+                            <h4>Главный герой</h4>
+                            <p>Личность и мотивация</p>
+                        </div>
+                    </div>
+                    <div class="triangle-item">
+                        <div class="triangle-content">
+                            <h4>Сеттинг</h4>
+                            <p>Мир и атмосфера</p>
+                        </div>
+                    </div>
+                    <div class="triangle-line triangle-line-1"></div>
+                    <div class="triangle-line triangle-line-2"></div>
+                    <div class="triangle-line triangle-line-3"></div>
+                </div>
+            </div>
+            
+            <div class="card animate">
+                <p>Нам нужно понять: какой конфликт лежит в основе, кто его разрешает и в каком мире это происходит.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="prompts">
+        <div class="container">
+            <h2>Запускаем генерацию идеи</h2>
+            <p class="animate">Задаём нейросети правильный запрос для получения оптимального результата</p>
+            
+            <div class="prompt-box animate">
+                <p class="prompt-text">Сгенерируй сюжет, главного героя и сеттинг для игры, задав 10 уточняющих вопросов</p>
+                <button class="copy-btn" onclick="copyPrompt(this)">Копировать</button>
+            </div>
+            
+            <div class="card animate">
+                <h3>Что делать с результатом?</h3>
+                <p>После получения ответов от нейросети у вас будет готовое ядро игры. Если что-то не понравится, можно сразу попросить ИИ внести правки:</p>
+                
+                <div class="grid" style="margin-top: 20px;">
+                    <div class="prompt-box">
+                        <p class="prompt-text">Перепиши это в стиле киберпанк</p>
+                        <button class="copy-btn" onclick="copyPrompt(this)">Копировать</button>
+                    </div>
+                    <div class="prompt-box">
+                        <p class="prompt-text">Сделай героя более саркастичным</p>
+                        <button class="copy-btn" onclick="copyPrompt(this)">Копировать</button>
+                    </div>
+                    <div class="prompt-box">
+                        <p class="prompt-text">Добавь больше мистических элементов</p>
+                        <button class="copy-btn" onclick="copyPrompt(this)">Копировать</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="visualization">
+        <div class="container">
+            <h2>Визуализируем концепт</h2>
+            <p class="animate">Генерируем изображения по готовому описанию</p>
+            
+            <div class="grid animate">
+                <div class="prompt-box">
+                    <p class="prompt-text">Сгенерируй концепт-арт главного героя на основе описанного выше</p>
+                    <button class="copy-btn" onclick="copyPrompt(this)">Копировать</button>
+                </div>
+                <div class="prompt-box">
+                    <p class="prompt-text">Сгенерируй концепт-арт мира игры, как мы его описали</p>
+                    <button class="copy-btn" onclick="copyPrompt(this)">Копировать</button>
+                </div>
+                <div class="prompt-box">
+                    <p class="prompt-text">Сгенерируй концепт-арт стартовой локации по нашему описанию</p>
+                    <button class="copy-btn" onclick="copyPrompt(this)">Копировать</button>
+                </div>
+            </div>
+            
+            <h3 class="animate" style="margin-top: 40px;">Примеры визуализации</h3>
+            <div class="image-gallery animate">
+                <div class="gallery-item">
+                    <img src="Assets/user-hero.jpeg" alt="Концепт-арт главного героя">
+                    <div class="gallery-caption">Главный герой</div>
+                </div>
+                <div class="gallery-item">
+                    <img src="Assets/user-station.jpeg" alt="Концепт-арт мира игры">
+                    <div class="gallery-caption">Мир игры</div>
+                </div>
+                <div class="gallery-item">
+                    <img src="Assets/user-lab.jpeg" alt="Концепт-арт стартовой локации">
+                    <div class="gallery-caption">Стартовая локация</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="homework">
+        <div class="container">
+            <h2>Ваш следующий шаг</h2>
+            <p class="animate">Как развивать проект после мастер-класса</p>
+            
+            <div class="grid animate">
+                <div class="card">
+                    <div class="icon-box">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h3>Детализируйте концепцию</h3>
+                    <p>Углубите историю и проработайте лор вашего игрового мира</p>
+                </div>
+                
+                <div class="card">
+                    <div class="icon-box">
+                        <i class="fas fa-images"></i>
+                    </div>
+                    <h3>Создайте галерею визуалов</h3>
+                    <p>Сгенерируйте вариации образов и стилей для ваших персонажей и локаций</p>
+                </div>
+                
+                <div class="card">
+                    <div class="icon-box">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h3>Соберите питч-документ</h3>
+                    <p>Объедините текст и арты в одну презентацию для вашего портфолио</p>
+                </div>
+                
+                <div class="card">
+                    <div class="icon-box">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <h3>Поделитесь результатом</h3>
+                    <p>Покажите проект единомышленникам или потенциальной команде</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="results">
+        <div class="container">
+            <h2>Результаты мастер-класса</h2>
+            <p class="animate">За 40 минут мы с нейросетью:</p>
+            
+            <div class="results-grid animate">
+                <div class="result-item">
+                    <div class="result-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <div>
+                        <h3>Поняли принципы работы ИИ</h3>
+                        <p>Как нейросеть стала креативным помощником</p>
+                    </div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-icon">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                    <div>
+                        <h3>Сгенерировали идею игры</h3>
+                        <p>Через диалог с нейросетью</p>
+                    </div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-icon">
+                        <i class="fas fa-puzzle-piece"></i>
+                    </div>
+                    <div>
+                        <h3>Создали ядро проекта</h3>
+                        <p>Сюжет, герой и сеттинг</p>
+                    </div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-icon">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                    <div>
+                        <h3>Визуализировали концепт</h3>
+                        <p>Концепт-арты персонажа и мира</p>
+                    </div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <div>
+                        <h3>Освоили инструменты</h3>
+                        <p>GigaChat для текста и изображений</p>
+                    </div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-icon">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
+                    <div>
+                        <h3>Получили готовый питч</h3>
+                        <p>Основу для портфолио или команды</p>
+                    </div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <div>
+                        <h3>Увидели будущее геймдева</h3>
+                        <p>Скорость и возможности ИИ-разработки</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer style="background: var(--dark); color: white; padding: 40px 20px; text-align: center;">
+        <div class="container">
+            <h3 style="color: white;">Нейросети: новый соавтор геймдизайнера</h3>
+            <p style="margin: 20px 0; opacity: 0.8;">Создаём питч-документ с историей, героем и сеттингом за 40 минут</p>
+            <p style="opacity: 0.6;">© 2023 Мастер-класс по использованию нейросетей в геймдизайне</p>
+        </div>
+    </footer>
 
     <script>
-        // Fancy hover spotlight for cards
-        document.querySelectorAll('.card').forEach(card => {
-            card.addEventListener('pointermove', (e)=>{
-                const rect = card.getBoundingClientRect();
-                const x = ((e.clientX - rect.left) / rect.width) * 100;
-                card.style.setProperty('--mx', x + '%');
+        // Функция для копирования промта
+        function copyPrompt(btn) {
+            const promptText = btn.parentElement.querySelector('.prompt-text').textContent;
+            navigator.clipboard.writeText(promptText).then(() => {
+                const originalText = btn.textContent;
+                btn.textContent = 'Скопировано!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
             });
-        });
-
-        const sections = [
-            document.querySelector('.registration-guide .card'),
-            document.querySelector('#step1'),
-            document.querySelector('#step2'),
-            document.querySelector('#step3'),
-            document.querySelector('#step4'),
-            document.querySelector('#demo'),
-        ].filter(Boolean);
-
-        const progressBar = document.getElementById('progressBar');
-        const prevBtn = document.getElementById('prev');
-        const nextBtn = document.getElementById('next');
-        const jumpBtn = document.getElementById('jumpToSteps');
-
-        function scrollToSection(idx){
-            const el = sections[idx];
-            if(!el) return;
-            el.scrollIntoView({ behavior: 'smooth', block: 'start'});
-            updateProgress(idx);
-            current = idx;
         }
-
-        function indexByScroll(){
-            const top = window.scrollY;
-            let idx = 0;
-            for(let i=0;i<sections.length;i++){
-                const rect = sections[i].getBoundingClientRect();
-                const y = rect.top + window.scrollY;
-                if(y - 120 <= top) idx = i;
-            }
-            return idx;
-        }
-
-        function updateProgress(idx){
-            const pct = ((idx+1) / sections.length) * 100;
-            progressBar.style.width = pct + '%';
-        }
-
-        let current = 0;
-        updateProgress(current);
-
-        nextBtn.addEventListener('click', ()=> scrollToSection(Math.min(current+1, sections.length-1)));
-        prevBtn.addEventListener('click', ()=> scrollToSection(Math.max(current-1, 0)));
-        jumpBtn.addEventListener('click', ()=> document.querySelector('#steps').scrollIntoView({behavior:'smooth'}));
-
-        window.addEventListener('scroll', ()=> {
-            const idx = indexByScroll();
-            current = idx;
-            updateProgress(idx);
-        });
-
-        // Copy buttons
-        document.querySelectorAll('[data-copy]').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                const parent = e.currentTarget.closest('.prompt');
-                if(!parent) return;
-                const text = parent.innerText.replace(/^\s*Копировать.*\n?/, '').trim();
-                try {
-                    await navigator.clipboard.writeText(text);
-                    const old = btn.innerText; btn.innerText = 'Скопировано!';
-                    btn.style.background = 'rgba(34,197,94,.2)';
-                    setTimeout(()=>{ btn.innerText = old; btn.style.background = 'rgba(124,92,255,.15)'; }, 1200);
-                } catch(err) {
-                    alert('Не удалось скопировать');
-                }
+        
+        // Анимация при скролле
+        document.addEventListener('DOMContentLoaded', () => {
+            const animatedElements = document.querySelectorAll('.animate');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = 1;
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            animatedElements.forEach(element => {
+                element.style.opacity = 0;
+                element.style.transform = 'translateY(20px)';
+                element.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+                observer.observe(element);
             });
-        });
-
-        // Keyboard navigation: J/K next/prev, C copy first visible prompt
-        window.addEventListener('keydown', (e)=>{
-            if(e.target && ['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
-            if(e.key.toLowerCase()==='j') nextBtn.click();
-            if(e.key.toLowerCase()==='k') prevBtn.click();
-            if(e.key.toLowerCase()==='c') {
-                const prompt = sections[current].querySelector('.prompt .copy');
-                if(prompt) prompt.click();
-            }
+            
+            // Мобильное меню
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            const navLinks = document.querySelector('.nav-links');
+            
+            menuBtn.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+            });
+            
+            // Закрытие меню при клике на ссылку
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.classList.remove('active');
+                });
+            });
         });
     </script>
 </body>
